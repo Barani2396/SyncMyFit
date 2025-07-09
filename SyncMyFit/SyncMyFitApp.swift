@@ -6,12 +6,30 @@
 //
 
 import SwiftUI
+import AuthenticationServices
 
 @main
 struct SyncMyFitApp: App {
+    @StateObject private var appState = AppState()
+
     var body: some Scene {
         WindowGroup {
-            ContentView()
+            NavigationStack {
+                if appState.isLoggedIn {
+                    DashboardView()
+                        .environmentObject(appState)
+                } else {
+                    LoginView()
+                        .environmentObject(appState)
+                }
+            }
+            .onAppear {
+                appState.checkLoginState()
+            }
+            .onOpenURL { url in
+                FitbitAuthManager.shared.handleRedirectURL(url)
+            }
         }
     }
 }
+
