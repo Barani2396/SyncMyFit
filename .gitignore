@@ -11,8 +11,8 @@ xcuserdata/
 *.xcscmblueprint
 
 # 👤 Secrets and sensitive files
-SyncMyFit/Secrets.swift
-SyncMyFit/Secrets.plist
+Secrets.swift
+Secrets.plist
 
 # 🗂️ System files
 .DS_Store
