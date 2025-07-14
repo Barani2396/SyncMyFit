@@ -9,6 +9,7 @@
 /* Begin PBXBuildFile section */
 		2853EA3B2E248E7E0075778E /* Secrets.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2853EA3A2E248E790075778E /* Secrets.swift */; };
 		2853EA3F2E248F0A0075778E /* Secrets.plist in Resources */ = {isa = PBXBuildFile; fileRef = 2853EA3E2E248F070075778E /* Secrets.plist */; };
+		28A86B122E24973000BE50EF /* README.md in Resources */ = {isa = PBXBuildFile; fileRef = 28A86B112E24973000BE50EF /* README.md */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -34,6 +35,7 @@
 		281636CF2E0B446E002DE4A9 /* SyncMyFitUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = SyncMyFitUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		2853EA3A2E248E790075778E /* Secrets.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Secrets.swift; sourceTree = "<group>"; };
 		2853EA3E2E248F070075778E /* Secrets.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Secrets.plist; sourceTree = "<group>"; };
+		28A86B112E24973000BE50EF /* README.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = README.md; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
@@ -50,6 +52,11 @@
 		281636D22E0B446E002DE4A9 /* SyncMyFitUITests */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
 			path = SyncMyFitUITests;
+			sourceTree = "<group>";
+		};
+		28A86B132E2497A100BE50EF /* Docs */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			path = Docs;
 			sourceTree = "<group>";
 		};
 /* End PBXFileSystemSynchronizedRootGroup section */
@@ -82,12 +89,14 @@
 		281636AE2E0B446D002DE4A9 = {
 			isa = PBXGroup;
 			children = (
+				28A86B132E2497A100BE50EF /* Docs */,
 				2853EA3E2E248F070075778E /* Secrets.plist */,
 				2853EA3A2E248E790075778E /* Secrets.swift */,
 				281636B92E0B446D002DE4A9 /* SyncMyFit */,
 				281636C82E0B446E002DE4A9 /* SyncMyFitTests */,
 				281636D22E0B446E002DE4A9 /* SyncMyFitUITests */,
 				281636B82E0B446D002DE4A9 /* Products */,
+				28A86B112E24973000BE50EF /* README.md */,
 			);
 			sourceTree = "<group>";
 		};
@@ -118,6 +127,7 @@
 			);
 			fileSystemSynchronizedGroups = (
 				281636B92E0B446D002DE4A9 /* SyncMyFit */,
+				28A86B132E2497A100BE50EF /* Docs */,
 			);
 			name = SyncMyFit;
 			packageProductDependencies = (
@@ -221,6 +231,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				28A86B122E24973000BE50EF /* README.md in Resources */,
 				2853EA3F2E248F0A0075778E /* Secrets.plist in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
