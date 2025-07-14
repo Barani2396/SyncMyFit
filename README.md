@@ -67,7 +67,7 @@ If you'd like to run **SyncMyFit** with your own Fitbit Client ID:
 
 ## App Demo
 
-▶️ [Watch the Demo (MP4)](https://youtube.com/shorts/9JEEu1LknRA)
+[![Watch the demo](https://img.youtube.com/vi/9JEEu1LknRA/hqdefault.jpg)](https://youtube.com/shorts/9JEEu1LknRA)
 
 ## Current Version
 
@@ -76,10 +76,6 @@ If you'd like to run **SyncMyFit** with your own Fitbit Client ID:
 ## Disclaimer
 
 This app is developed for personal use and is not affiliated with Fitbit or Apple.
-
-## License
-
-[MIT](LICENSE) — Feel free to use and modify.
 
 ## Developed By
 
