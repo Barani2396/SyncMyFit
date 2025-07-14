@@ -1,0 +1,46 @@
+# 📦 Xcode & macOS
+DerivedData/
+build/
+*.xcworkspace
+xcuserdata/
+*.xcuserstate
+
+# 🔐 Personal configuration
+*.swp
+*.xcuserdatad
+*.xcscmblueprint
+
+# 👤 Secrets and sensitive files
+SyncMyFit/Secrets.swift
+SyncMyFit/Secrets.plist
+
+# 🗂️ System files
+.DS_Store
+
+# 📋 Logs
+*.log
+
+# 🧪 Test result files
+*.xctest
+
+# 📄 Generated preview files
+Preview Content/
+
+# 💾 Swift Package Manager
+.swiftpm/
+.build/
+Packages/
+
+# 📚 CocoaPods (if used)
+Pods/
+
+# 📘 Carthage (if used)
+Carthage/
+
+# 📱 Fastlane (optional)
+fastlane/report.xml
+fastlane/Preview.html
+fastlane/screenshots/
+
+# 📂 Firebase/GoogleService files (if added later)
+GoogleService-Info.plist
