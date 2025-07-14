@@ -67,9 +67,7 @@ If you'd like to run **SyncMyFit** with your own Fitbit Client ID:
 
 ## App Demo
 
-<a href="https://youtube.com/shorts/9JEEu1LknRA" target="_blank">
-  <img src="https://img.youtube.com/vi/9JEEu1LknRA/hqdefault.jpg" alt="Watch the demo" width="480">
-</a>
+[![Watch the demo](https://img.youtube.com/vi/9JEEu1LknRA/hqdefault.jpg)](https://youtube.com/shorts/9JEEu1LknRA)
 
 ## Current Version
 
