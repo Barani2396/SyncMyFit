@@ -10,20 +10,30 @@ import AuthenticationServices
 import CryptoKit
 import UIKit
 
+// MARK: - FitbitAuthManager
+
+/// Manages OAuth authentication with Fitbit using PKCE, token exchange, refresh, and secure token storage.
 class FitbitAuthManager: NSObject, ASWebAuthenticationPresentationContextProviding {
+    
+    // MARK: - Singleton
+
     static let shared = FitbitAuthManager()
 
-    private let clientId = "AddClientIdHere"
+    // MARK: - Properties
+
+    private let clientId = Secrets.shared.fitbitClientID
     private let redirectURI = "syncmyfit://auth"
     private var currentSession: ASWebAuthenticationSession?
-
     private var codeVerifier: String = ""
-    
+
+    /// Exposes the stored access token publicly (read-only).
     var accessToken: String? {
-        get { storedAccessToken }
+        storedAccessToken
     }
 
-    // MARK: - Start Login Flow (PKCE)
+    // MARK: - OAuth Login Flow
+
+    /// Initiates Fitbit OAuth flow using PKCE.
     func startLogin(completion: @escaping (Result<String, Error>) -> Void) {
         codeVerifier = generateCodeVerifier()
         let codeChallenge = generateCodeChallenge(from: codeVerifier)
@@ -57,6 +67,8 @@ class FitbitAuthManager: NSObject, ASWebAuthenticationPresentationContextProvidi
     }
 
     // MARK: - Token Exchange
+
+    /// Exchanges the authorization code for an access token and stores it securely.
     func fetchAccessToken(authCode: String, completion: @escaping (Result<String, Error>) -> Void) {
         guard let url = URL(string: "https://api.fitbit.com/oauth2/token") else { return }
 
@@ -77,7 +89,7 @@ class FitbitAuthManager: NSObject, ASWebAuthenticationPresentationContextProvidi
             .joined(separator: "&")
             .data(using: .utf8)
 
-        URLSession.shared.dataTask(with: request) { data, response, error in
+        URLSession.shared.dataTask(with: request) { data, _, error in
             if let error = error {
                 return completion(.failure(error))
             }
@@ -87,22 +99,22 @@ class FitbitAuthManager: NSObject, ASWebAuthenticationPresentationContextProvidi
             }
 
             do {
-                let parsed = try JSONSerialization.jsonObject(with: data) as? [String: Any]
+                let json = try JSONSerialization.jsonObject(with: data) as? [String: Any]
 
-                if let json = parsed, let accessToken = json["access_token"] as? String {
+                if let accessToken = json?["access_token"] as? String {
                     self.storedAccessToken = accessToken
 
-                    if let refreshToken = json["refresh_token"] as? String {
+                    if let refreshToken = json?["refresh_token"] as? String {
                         self.storedRefreshToken = refreshToken
                     }
-                    
-                    if let expiresIn = json["expires_in"] as? Double {
+
+                    if let expiresIn = json?["expires_in"] as? Double {
                         let expiresAt = Date().addingTimeInterval(expiresIn)
                         UserDefaults.standard.set(expiresAt, forKey: "fitbit_token_expires_at")
                     }
 
                     completion(.success(accessToken))
-                } else if let json = parsed, let errors = json["errors"] as? [[String: Any]] {
+                } else if let errors = json?["errors"] as? [[String: Any]] {
                     print("Fitbit API Error: \(errors)")
                     completion(.failure(NSError(domain: "Fitbit error", code: -2)))
                 } else {
@@ -115,6 +127,9 @@ class FitbitAuthManager: NSObject, ASWebAuthenticationPresentationContextProvidi
         }.resume()
     }
 
+    // MARK: - Token Refresh
+
+    /// Refreshes the Fitbit access token using the stored refresh token.
     func refreshAccessToken(completion: @escaping (Result<String, Error>) -> Void) {
         guard let refreshToken = storedRefreshToken,
               let url = URL(string: "https://api.fitbit.com/oauth2/token") else {
@@ -136,7 +151,7 @@ class FitbitAuthManager: NSObject, ASWebAuthenticationPresentationContextProvidi
             .joined(separator: "&")
             .data(using: .utf8)
 
-        URLSession.shared.dataTask(with: request) { data, response, error in
+        URLSession.shared.dataTask(with: request) { data, _, error in
             if let error = error {
                 return completion(.failure(error))
             }
@@ -146,22 +161,22 @@ class FitbitAuthManager: NSObject, ASWebAuthenticationPresentationContextProvidi
             }
 
             do {
-                let parsed = try JSONSerialization.jsonObject(with: data) as? [String: Any]
+                let json = try JSONSerialization.jsonObject(with: data) as? [String: Any]
 
-                if let json = parsed, let newAccessToken = json["access_token"] as? String {
+                if let newAccessToken = json?["access_token"] as? String {
                     self.storedAccessToken = newAccessToken
 
-                    if let newRefreshToken = json["refresh_token"] as? String {
+                    if let newRefreshToken = json?["refresh_token"] as? String {
                         self.storedRefreshToken = newRefreshToken
                     }
-                    
-                    if let expiresIn = json["expires_in"] as? Double {
+
+                    if let expiresIn = json?["expires_in"] as? Double {
                         let expiresAt = Date().addingTimeInterval(expiresIn)
                         UserDefaults.standard.set(expiresAt, forKey: "fitbit_token_expires_at")
                     }
 
                     completion(.success(newAccessToken))
-                } else if let json = parsed, let errors = json["errors"] as? [[String: Any]] {
+                } else if let errors = json?["errors"] as? [[String: Any]] {
                     print("Fitbit API Error: \(errors)")
                     completion(.failure(NSError(domain: "Fitbit error", code: -2)))
                 } else {
@@ -174,12 +189,52 @@ class FitbitAuthManager: NSObject, ASWebAuthenticationPresentationContextProvidi
         }.resume()
     }
 
-    // MARK: - URL Handling
+    // MARK: - Authorized Requests
+
+    /// Sends a request with the current access token.
+    /// Automatically refreshes token once if expired.
+    func performAuthenticatedRequest(
+        _ request: URLRequest,
+        retryOnAuthFailure: Bool = true,
+        completion: @escaping (Result<Data, Error>) -> Void
+    ) {
+        var request = request
+
+        guard let token = storedAccessToken else {
+            return completion(.failure(NSError(domain: "No access token", code: 401)))
+        }
+
+        request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
+
+        URLSession.shared.dataTask(with: request) { data, response, error in
+            if let error = error {
+                return completion(.failure(error))
+            }
+
+            if let httpResponse = response as? HTTPURLResponse, httpResponse.statusCode == 401, retryOnAuthFailure {
+                self.refreshAccessToken { result in
+                    switch result {
+                    case .success:
+                        self.performAuthenticatedRequest(request, retryOnAuthFailure: false, completion: completion)
+                    case .failure(let refreshError):
+                        completion(.failure(refreshError))
+                    }
+                }
+            } else if let data = data {
+                completion(.success(data))
+            } else {
+                completion(.failure(NSError(domain: "Unknown response", code: -1)))
+            }
+        }.resume()
+    }
+
+    // MARK: - Redirect Handler
+
+    /// Handles the redirect URL and triggers token exchange.
     func handleRedirectURL(_ url: URL) {
-        guard let code = URLComponents(url: url, resolvingAgainstBaseURL: false)?
-            .queryItems?.first(where: { $0.name == "code" })?.value else {
-                print("No authorization code in URL")
-                return
+        guard let code = extractCode(from: url) else {
+            print("No authorization code in URL")
+            return
         }
 
         print("Authorization Code: \(code)")
@@ -191,7 +246,8 @@ class FitbitAuthManager: NSObject, ASWebAuthenticationPresentationContextProvidi
         }
     }
 
-    // MARK: - Presentation Anchor for OAuth
+    // MARK: - Presentation Anchor (ASWebAuthenticationSession)
+
     func presentationAnchor(for session: ASWebAuthenticationSession) -> ASPresentationAnchor {
         UIApplication.shared.connectedScenes
             .compactMap { $0 as? UIWindowScene }
@@ -199,7 +255,8 @@ class FitbitAuthManager: NSObject, ASWebAuthenticationPresentationContextProvidi
             .first { $0.isKeyWindow } ?? ASPresentationAnchor()
     }
 
-    // MARK: - Helpers
+    // MARK: - PKCE Utility
+
     private func generateCodeVerifier() -> String {
         let charset = Array("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-._~")
         return String((0..<128).compactMap { _ in charset.randomElement() })
@@ -214,7 +271,7 @@ class FitbitAuthManager: NSObject, ASWebAuthenticationPresentationContextProvidi
         URLComponents(url: url, resolvingAgainstBaseURL: true)?
             .queryItems?.first(where: { $0.name == "code" })?.value
     }
-    
+
     func isTokenValid() -> Bool {
         guard let expiresAt = UserDefaults.standard.object(forKey: "fitbit_token_expires_at") as? Date else {
             return false
@@ -223,7 +280,8 @@ class FitbitAuthManager: NSObject, ASWebAuthenticationPresentationContextProvidi
     }
 }
 
-// MARK: - Secure Token Storage
+// MARK: - Keychain Accessors
+
 extension FitbitAuthManager {
     private var accessTokenKey: String { "fitbit_access_token" }
     private var refreshTokenKey: String { "fitbit_refresh_token" }
@@ -257,6 +315,7 @@ extension FitbitAuthManager {
         }
     }
 
+    /// Clears stored tokens from the Keychain.
     func logout() {
         storedAccessToken = nil
         storedRefreshToken = nil
@@ -264,7 +323,9 @@ extension FitbitAuthManager {
 }
 
 // MARK: - Base64 URL Encoding
+
 extension Data {
+    /// Encodes data into base64 URL-safe format (used for PKCE challenge).
     func base64URLEncodedString() -> String {
         self.base64EncodedString()
             .replacingOccurrences(of: "+", with: "-")
