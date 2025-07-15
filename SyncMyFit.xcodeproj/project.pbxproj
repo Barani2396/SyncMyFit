@@ -54,11 +54,6 @@
 			path = SyncMyFitUITests;
 			sourceTree = "<group>";
 		};
-		28A86B132E2497A100BE50EF /* Docs */ = {
-			isa = PBXFileSystemSynchronizedRootGroup;
-			path = Docs;
-			sourceTree = "<group>";
-		};
 /* End PBXFileSystemSynchronizedRootGroup section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -89,7 +84,6 @@
 		281636AE2E0B446D002DE4A9 = {
 			isa = PBXGroup;
 			children = (
-				28A86B132E2497A100BE50EF /* Docs */,
 				2853EA3E2E248F070075778E /* Secrets.plist */,
 				2853EA3A2E248E790075778E /* Secrets.swift */,
 				281636B92E0B446D002DE4A9 /* SyncMyFit */,
@@ -127,7 +121,6 @@
 			);
 			fileSystemSynchronizedGroups = (
 				281636B92E0B446D002DE4A9 /* SyncMyFit */,
-				28A86B132E2497A100BE50EF /* Docs */,
 			);
 			name = SyncMyFit;
 			packageProductDependencies = (
